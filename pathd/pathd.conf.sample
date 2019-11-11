@@ -2,6 +2,7 @@
 !
 password frr
 log stdout
+pce ip 1.2.3.4
 !
 te-path mpls input 500
  nexthop 10.0.1.2 interface eth0 label 500
