@@ -25,6 +25,173 @@
 #include "pathd/path_nb.h"
 
 /*
+ * XPath: /frr-pathd:pathd/segment-list
+ */
+int pathd_te_segment_list_create(enum nb_event event, const struct lyd_node *dnode,
+			  union nb_resource *resource)
+{
+	return NB_OK;
+}
+
+int pathd_te_segment_list_destroy(enum nb_event event, const struct lyd_node *dnode)
+{
+	return NB_OK;
+}
+
+/*
+ * XPath: /frr-pathd:pathd/segment-list/label
+ */
+int pathd_te_segment_list_label_create(enum nb_event event, const struct lyd_node *dnode,
+			  union nb_resource *resource)
+{
+	return NB_OK;
+}
+
+int pathd_te_segment_list_label_destroy(enum nb_event event, const struct lyd_node *dnode)
+{
+	return NB_OK;
+}
+
+int pathd_te_segment_list_label_move(enum nb_event event,
+					   const struct lyd_node *dnode)
+{
+	return NB_OK;
+}
+
+/*
+ * XPath: /frr-pathd:pathd/sr-policy
+ */
+int pathd_te_sr_policy_create(enum nb_event event, const struct lyd_node *dnode,
+			  union nb_resource *resource)
+{
+	return NB_OK;
+}
+
+int pathd_te_sr_policy_destroy(enum nb_event event, const struct lyd_node *dnode)
+{
+	return NB_OK;
+}
+
+/*
+ * XPath: /frr-pathd:pathd/sr-policy/color
+ */
+int pathd_te_sr_policy_color_modify(enum nb_event event,
+					  const struct lyd_node *dnode,
+					  union nb_resource *resource)
+{
+	return NB_OK;
+}
+
+int pathd_te_sr_policy_color_destroy(enum nb_event event, const struct lyd_node *dnode)
+{
+	return NB_OK;
+}
+
+/*
+ * XPath: /frr-pathd:pathd/sr-policy/endpoint
+ */
+int pathd_te_sr_policy_endpoint_modify(enum nb_event event,
+					  const struct lyd_node *dnode,
+					  union nb_resource *resource)
+{
+	return NB_OK;
+}
+
+int pathd_te_sr_policy_endpoint_destroy(enum nb_event event, const struct lyd_node *dnode)
+{
+	return NB_OK;
+}
+
+/*
+ * XPath: /frr-pathd:pathd/sr-policy/binding-sid
+ */
+int pathd_te_sr_policy_binding_sid_modify(enum nb_event event,
+					  const struct lyd_node *dnode,
+					  union nb_resource *resource)
+{
+	return NB_OK;
+}
+
+int pathd_te_sr_policy_binding_sid_destroy(enum nb_event event, const struct lyd_node *dnode)
+{
+	return NB_OK;
+}
+
+/*
+ * XPath: /frr-pathd:pathd/sr-policy/candidate-path
+ */
+int pathd_te_sr_policy_candidate_path_create(enum nb_event event, const struct lyd_node *dnode,
+			  union nb_resource *resource)
+{
+	return NB_OK;
+}
+
+int pathd_te_sr_policy_candidate_path_destroy(enum nb_event event, const struct lyd_node *dnode)
+{
+	return NB_OK;
+}
+
+/*
+ * XPath: /frr-pathd:pathd/sr-policy/candidate-path/protocol-origin
+ */
+int pathd_te_sr_policy_candidate_path_protocol_origin_modify(enum nb_event event,
+					  const struct lyd_node *dnode,
+					  union nb_resource *resource)
+{
+	return NB_OK;
+}
+
+int pathd_te_sr_policy_candidate_path_protocol_origin_destroy(enum nb_event event, const struct lyd_node *dnode)
+{
+	return NB_OK;
+}
+
+/*
+ * XPath: /frr-pathd:pathd/sr-policy/candidate-path/originator
+ */
+int pathd_te_sr_policy_candidate_path_originator_modify(enum nb_event event,
+					  const struct lyd_node *dnode,
+					  union nb_resource *resource)
+{
+	return NB_OK;
+}
+
+int pathd_te_sr_policy_candidate_path_originator_destroy(enum nb_event event, const struct lyd_node *dnode)
+{
+	return NB_OK;
+}
+
+/*
+ * XPath: /frr-pathd:pathd/sr-policy/candidate-path/dynamic-flag
+ */
+int pathd_te_sr_policy_candidate_path_dynamic_flag_modify(enum nb_event event,
+					  const struct lyd_node *dnode,
+					  union nb_resource *resource)
+{
+	return NB_OK;
+}
+
+int pathd_te_sr_policy_candidate_path_dynamic_flag_destroy(enum nb_event event, const struct lyd_node *dnode)
+{
+	return NB_OK;
+}
+
+/*
+ * XPath: /frr-pathd:pathd/sr-policy/candidate-path/segment-list-name
+ */
+int pathd_te_sr_policy_candidate_path_segment_list_name_modify(enum nb_event event,
+					  const struct lyd_node *dnode,
+					  union nb_resource *resource)
+{
+	return NB_OK;
+}
+
+int pathd_te_sr_policy_candidate_path_segment_list_name_destroy(enum nb_event event, const struct lyd_node *dnode)
+{
+	return NB_OK;
+}
+
+/*
  * XPath: /frr-pathd:pathd/mpls/lsp
  */
 int pathd_mpls_lsp_create(enum nb_event event, const struct lyd_node *dnode,
