@@ -26,12 +26,6 @@ enum zebra_sr_policy_update_label_mode {
 	ZEBRA_SR_POLICY_LABEL_REMOVED = 3,
 };
 
-enum zebra_sr_policy_status {
-	ZEBRA_SR_POLICY_UNKNOWN = 0,
-	ZEBRA_SR_POLICY_UP = 1,
-	ZEBRA_SR_POLICY_DOWN = 2,
-};
-
 struct zebra_sr_policy {
 	RB_ENTRY(zebra_sr_policy) entry;
 	uint32_t color;

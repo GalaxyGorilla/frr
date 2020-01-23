@@ -2568,6 +2568,21 @@ stream_failure:
 	return -1;
 }
 
+int zapi_sr_policy_notify_status_decode(struct stream *s, struct zapi_sr_policy *zp)
+{
+	memset(zp, 0, sizeof(*zp));
+
+	STREAM_GETL(s, zp->color);
+	STREAM_GET(&zp->endpoint.s_addr, s, IPV4_MAX_BYTELEN);
+	STREAM_GET(&zp->name, s, ZEBRA_SR_POLICY_NAME_MAX_LENGTH);
+	STREAM_GETL(s, zp->status);
+
+	return 0;
+
+stream_failure:
+	return -1;
+}
+
 int zebra_send_mpls_labels(struct zclient *zclient, int cmd,
 			   struct zapi_labels *zl)
 {
@@ -3084,6 +3099,9 @@ static int zclient_read(struct thread *thread)
 			(*zclient->vxlan_sg_del)(command, zclient, length,
 						    vrf_id);
 		break;
+	case ZEBRA_SR_POLICY_NOTIFY_STATUS:
+		if (zclient->sr_policy_notify_status)
+			(*zclient->sr_policy_notify_status)(command, zclient, length, vrf_id);
 	default:
 		break;
 	}
