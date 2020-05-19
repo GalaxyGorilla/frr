@@ -192,6 +192,9 @@ struct isis_area *isis_area_create(const char *area_tag)
 	area->lsp_refresh_arg[1].area = area;
 	area->lsp_refresh_arg[1].level = IS_LEVEL_2;
 
+	area->bfd_signalled_down = 0;
+	area->bfd_force_spf_refresh = 0;
+
 
 	QOBJ_REG(area, isis_area);
 

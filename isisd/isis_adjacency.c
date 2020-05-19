@@ -171,13 +171,13 @@ void isis_delete_adj(void *arg)
 		return;
 
 	THREAD_TIMER_OFF(adj->t_expire);
-	if (adj->adj_state != ISIS_ADJ_DOWN) {
+	if (adj->adj_state != ISIS_ADJ_DOWN)
 		adj->adj_state = ISIS_ADJ_DOWN;
-		hook_call(isis_adj_state_change_hook, adj);
-	}
 
 	/* remove from SPF trees */
 	spftree_area_adj_del(adj->circuit->area, adj);
+
+	hook_call(isis_adj_state_change_hook, adj);
 
 	XFREE(MTYPE_ISIS_ADJACENCY_INFO, adj->area_addresses);
 	XFREE(MTYPE_ISIS_ADJACENCY_INFO, adj->ipv4_addresses);
@@ -322,7 +322,6 @@ void isis_adj_state_change(struct isis_adjacency **padj,
 				if (circuit->upadjcount[level - 1] == 0)
 					isis_tx_queue_clean(circuit->tx_queue);
 
-				hook_call(isis_adj_state_change_hook, adj);
 				del = true;
 			}
 
@@ -369,7 +368,6 @@ void isis_adj_state_change(struct isis_adjacency **padj,
 				if (circuit->upadjcount[level - 1] == 0)
 					isis_tx_queue_clean(circuit->tx_queue);
 
-				hook_call(isis_adj_state_change_hook, adj);
 				del = true;
 			}
 		}

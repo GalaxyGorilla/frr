@@ -1367,7 +1367,13 @@ static int lsp_refresh(struct thread *thread)
 	if ((area->is_type & level) == 0)
 		return ISIS_ERROR;
 
-	if (monotime_since(&area->last_lsp_refresh_event[level - 1], NULL) < 100000L) {
+	/*
+	 * Throttle regeneration of LSPs (but not when BFD signalled a 'down'
+	 * message)
+	 */
+	if (monotime_since(&area->last_lsp_refresh_event[level - 1], NULL)
+		    < 100000L
+	    && !(area->bfd_force_spf_refresh)) {
 		sched_debug("ISIS (%s): Still unstable, postpone LSP L%d refresh",
 			    area->area_tag, level);
 		_lsp_regenerate_schedule(area, level, 0, false,
@@ -1420,7 +1426,12 @@ int _lsp_regenerate_schedule(struct isis_area *area, int level,
 			"ISIS (%s): Checking whether L%d needs to be scheduled",
 			area->area_tag, lvl);
 
-		if (area->lsp_regenerate_pending[lvl - 1]) {
+		if (area->lsp_regenerate_pending[lvl - 1]
+		    && !(area->bfd_signalled_down)) {
+			/*
+			 * Note: in case of a BFD 'down' message the refresh is
+			 * scheduled once again just to be sure
+			 */
 			struct timeval remain = thread_timer_remain(
 				area->t_lsp_refresh[lvl - 1]);
 			sched_debug(
@@ -1448,7 +1459,8 @@ int _lsp_regenerate_schedule(struct isis_area *area, int level,
 			(long long)now);
 		THREAD_TIMER_OFF(area->t_lsp_refresh[lvl - 1]);
 		diff = now - lsp->last_generated;
-		if (diff < area->lsp_gen_interval[lvl - 1]) {
+		if (diff < area->lsp_gen_interval[lvl - 1]
+		    && !(area->bfd_signalled_down)) {
 			timeout =
 				1000 * (area->lsp_gen_interval[lvl - 1] - diff);
 			sched_debug(
@@ -1456,17 +1468,21 @@ int _lsp_regenerate_schedule(struct isis_area *area, int level,
 				area->area_tag, timeout);
 		} else {
 			/*
-			 * lsps are not regenerated if lsp_regenerate function
-			 * is called
-			 * directly. However if the lsp_regenerate call is
-			 * queued for
-			 * later execution it works.
+			 * Schedule LSP refresh ASAP
 			 */
-			timeout = 100;
-			sched_debug(
-				"ISIS (%s): Last generation was more than lsp_gen_interval ago."
-				" Scheduling for execution in %ld ms.",
-				area->area_tag, timeout);
+			timeout = 0;
+
+			if (area->bfd_signalled_down) {
+				sched_debug(
+					"ISIS (%s): Scheduling immediately due to BDF 'down' message.",
+					area->area_tag);
+				area->bfd_signalled_down = 0;
+				area->bfd_force_spf_refresh = 1;
+			} else {
+				sched_debug(
+					"ISIS (%s): Last generation was more than lsp_gen_interval ago. Scheduling for execution now.",
+					area->area_tag);
+			}
 		}
 
 		area->lsp_regenerate_pending[lvl - 1] = 1;

@@ -128,6 +128,9 @@ struct isis_area {
 	 */
 	int lsp_regenerate_pending[ISIS_LEVELS];
 
+	int bfd_signalled_down;
+	int bfd_force_spf_refresh;
+
 	struct fabricd *fabricd;
 
 	/*
