@@ -205,6 +205,8 @@ int isis_receive(struct thread *thread);
 
 #define ISIS_AUTH_MD5_SIZE       16U
 
+DECLARE_HOOK(isis_adj_change_hook, (struct isis_adjacency *adj), (adj))
+
 /*
  * Sending functions
  */

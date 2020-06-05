@@ -68,7 +68,7 @@ struct isis_dis_record {
 	time_t last_dis_change; /* timestamp for last dis change */
 };
 
-struct bfd_session;
+struct bfd_sessions;
 struct isis_area;
 
 struct isis_adjacency {
@@ -103,7 +103,7 @@ struct isis_adjacency {
 	struct isis_circuit *circuit; /* back pointer */
 	uint16_t *mt_set;      /* Topologies this adjacency is valid for */
 	unsigned int mt_count; /* Number of entries in mt_set */
-	struct bfd_session *bfd_session;
+	struct bfd_sessions *bfd_sessions;
 	struct list *adj_sids; /* Segment Routing Adj-SIDs. */
 };
 

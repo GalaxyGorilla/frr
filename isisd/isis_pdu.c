@@ -125,6 +125,8 @@ struct iih_info {
 	struct isis_tlvs *tlvs;
 };
 
+DEFINE_HOOK(isis_adj_change_hook, (struct isis_adjacency *adj), (adj))
+
 static int process_p2p_hello(struct iih_info *iih)
 {
 	struct isis_threeway_adj *tw_adj = iih->tlvs->threeway_adj;
@@ -401,6 +403,7 @@ static int process_p2p_hello(struct iih_info *iih)
 			lsp_regenerate_schedule(
 				adj->circuit->area,
 				isis_adj_usage2levels(adj->adj_usage), 0);
+			hook_call(isis_adj_change_hook, adj);
 		}
 
 		/* 8.2.5.2 c) if the action was up - comparing circuit IDs */
@@ -519,8 +522,10 @@ static int process_lan_hello(struct iih_info *iih)
 		}
 	}
 
-	if (adj->adj_state == ISIS_ADJ_UP && changed)
+	if (adj->adj_state == ISIS_ADJ_UP && changed) {
 		lsp_regenerate_schedule(adj->circuit->area, iih->level, 0);
+		hook_call(isis_adj_change_hook, adj);
+	}
 
 	if (isis->debugs & DEBUG_ADJ_PACKETS) {
 		zlog_debug(
