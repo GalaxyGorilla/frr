@@ -38,7 +38,7 @@
 #include "pathd/path_pcep_cli.h"
 #include "pathd/path_pcep_controller.h"
 #include "pathd/path_pcep_lib.h"
-#include "pathd/path_pcep_nb.h"
+#include "pathd/path_pcep_config.h"
 #include "pathd/path_pcep_cli_clippy.c"
 
 #define DEFAULT_PCC_MSD 4
