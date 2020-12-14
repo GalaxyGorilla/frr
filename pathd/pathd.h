@@ -177,6 +177,8 @@ RB_HEAD(srte_segment_entry_head, srte_segment_entry);
 RB_PROTOTYPE(srte_segment_entry_head, srte_segment_entry, entry,
 	     srte_segment_entry_compare)
 
+#define SRTE_ORIGINATOR_MAX_STR_LEN 64
+
 struct srte_segment_list {
 	RB_ENTRY(srte_segment_list) entry;
 
@@ -187,7 +189,7 @@ struct srte_segment_list {
 	enum srte_protocol_origin protocol_origin;
 
 	/* The Originator */
-	char originator[64];
+	char originator[SRTE_ORIGINATOR_MAX_STR_LEN];
 
 	/* Nexthops. */
 	struct srte_segment_entry_head segments;
@@ -223,7 +225,7 @@ struct srte_lsp {
 	enum srte_protocol_origin protocol_origin;
 
 	/* The Originator */
-	char originator[64];
+	char originator[SRTE_ORIGINATOR_MAX_STR_LEN];
 
 	/* The Discriminator */
 	uint32_t discriminator;
@@ -264,7 +266,7 @@ struct srte_candidate {
 	enum srte_protocol_origin protocol_origin;
 
 	/* The Originator */
-	char originator[64];
+	char originator[SRTE_ORIGINATOR_MAX_STR_LEN];
 
 	/* The Discriminator */
 	uint32_t discriminator;
@@ -370,8 +372,10 @@ void srte_policy_update_binding_sid(struct srte_policy *policy,
 				    uint32_t binding_sid);
 void srte_apply_changes(void);
 void srte_policy_apply_changes(struct srte_policy *policy);
-struct srte_candidate *srte_candidate_add(struct srte_policy *policy,
-					  uint32_t preference);
+struct srte_candidate *
+srte_candidate_add(struct srte_policy *policy,
+		   enum srte_protocol_origin protocol_origin,
+		   const char *originator, uint32_t discriminator);
 void srte_candidate_del(struct srte_candidate *candidate);
 void srte_candidate_set_bandwidth(struct srte_candidate *candidate,
 				  float bandwidth, bool required);
@@ -398,8 +402,10 @@ void srte_lsp_set_metric(struct srte_lsp *lsp,
 			 bool required, bool is_cound, bool is_computed);
 void srte_lsp_unset_metric(struct srte_lsp *lsp,
 			   enum srte_candidate_metric_type type);
-struct srte_candidate *srte_candidate_find(struct srte_policy *policy,
-					   uint32_t preference);
+struct srte_candidate *
+srte_candidate_find(struct srte_policy *policy,
+		    enum srte_protocol_origin protocol_origin,
+		    const char *originator, uint32_t discriminator);
 struct srte_segment_entry *
 srte_segment_entry_find(struct srte_segment_list *segment_list, uint32_t index);
 void srte_candidate_status_update(struct srte_candidate *candidate, int status);

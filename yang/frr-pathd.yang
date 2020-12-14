@@ -54,7 +54,7 @@ module frr-pathd {
         }
         description
           "Identifier of the originator of an object, could be 'config', '1.1.1.1:4189' or '2001:db8:85a3::8a2e:370:7334:4189'";
-      }
+  }
 
   container pathd {
     container srte {
@@ -145,6 +145,7 @@ module frr-pathd {
         unique "name";
         leaf color {
           type uint32;
+          mandatory true;
           description
             "Color of the SR Policy.";
         }
@@ -175,9 +176,23 @@ module frr-pathd {
           unique "name";
           description
             "List of Candidate Paths of the SR Policy.";
-          key "preference";
+          key "protocol-origin originator discriminator";
+          leaf protocol-origin {
+            type protocol-origin-type;
+            description
+              "Indication for the protocol origin of the Candidate Path.";
+          }
+          leaf originator {
+            type originator-type;
+            description "Originator of the candidate path";
+          }
+          leaf discriminator {
+            type uint32;
+            description "Candidate path distinguisher";
+          }
           leaf preference {
             type uint32;
+            mandatory true;
             description
               "Administrative preference.";
           }
@@ -194,22 +209,6 @@ module frr-pathd {
             config false;
             description
               "True if the candidate path is the best candidate path, False otherwise";
-          }
-          leaf protocol-origin {
-            type protocol-origin-type;
-            mandatory true;
-            description
-              "Indication for the protocol origin of the Candidate Path.";
-          }
-          leaf originator {
-            type originator-type;
-            mandatory true;
-            description "Originator of the candidate path";
-          }
-          leaf discriminator {
-            type uint32;
-            config false;
-            description "Candidate path distinguisher";
           }
           leaf type {
             description

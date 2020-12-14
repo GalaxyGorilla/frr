@@ -11,13 +11,13 @@
               "protocol-origin": "local",
               "originator": "config",
               "discriminator": 1,
-              "is-best-candidate-path": false
+              "is-best-candidate-path": true
             },
             {
               "protocol-origin": "local",
               "originator": "config",
               "discriminator": 2,
-              "is-best-candidate-path": true
+              "is-best-candidate-path": false
             }
           ]
         }

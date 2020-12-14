@@ -517,52 +517,86 @@ void cli_show_srte_policy_binding_sid(struct vty *vty,
  */
 DEFPY(srte_policy_candidate_exp,
       srte_policy_candidate_exp_cmd,
-      "candidate-path preference (0-4294967295)$preference name WORD$name \
+      "candidate-path preference (0-4294967295)$preference [discriminator (0-4294967295)$discriminator] name WORD$name \
 	 explicit segment-list WORD$list_name",
       "Segment Routing Policy Candidate Path\n"
       "Segment Routing Policy Candidate Path Preference\n"
       "Administrative Preference\n"
+      "Segment Routing Policy Candidate Path Discriminator\n"
+      "Discriminator\n"
       "Segment Routing Policy Candidate Path Name\n"
       "Symbolic Name\n"
       "Explicit Path\n"
       "List of SIDs\n"
       "Name of the Segment List\n")
 {
-	nb_cli_enqueue_change(vty, ".", NB_OP_CREATE, preference_str);
+	uint32_t discriminator_uint32;
+	char discriminator_tmp[11];
+
+	if (!discriminator_str) {
+		discriminator_uint32 = rand();
+		snprintf(discriminator_tmp, sizeof(discriminator_tmp), "%u",
+			 discriminator_uint32);
+	} else {
+		strlcpy(discriminator_tmp, discriminator_str,
+			sizeof(discriminator_tmp));
+	}
+
+	nb_cli_enqueue_change(vty, ".", NB_OP_CREATE, NULL);
 	nb_cli_enqueue_change(vty, "./name", NB_OP_MODIFY, name);
-	nb_cli_enqueue_change(vty, "./protocol-origin", NB_OP_MODIFY, "local");
-	nb_cli_enqueue_change(vty, "./originator", NB_OP_MODIFY, "config");
+	nb_cli_enqueue_change(vty, "./preference", NB_OP_MODIFY,
+			      preference_str);
 	nb_cli_enqueue_change(vty, "./type", NB_OP_MODIFY, "explicit");
 	nb_cli_enqueue_change(vty, "./segment-list-name", NB_OP_MODIFY,
 			      list_name);
-	return nb_cli_apply_changes(vty, "./candidate-path[preference='%s']",
-				    preference_str);
+
+	return nb_cli_apply_changes(
+		vty,
+		"./candidate-path[protocol-origin='local'][originator='config'][discriminator='%s']",
+		discriminator_tmp);
 }
 
 DEFPY_NOSH(
 	srte_policy_candidate_dyn,
 	srte_policy_candidate_dyn_cmd,
-	"candidate-path preference (0-4294967295)$preference name WORD$name dynamic",
+	"candidate-path preference (0-4294967295)$preference [discriminator (0-4294967295)$discriminator] name WORD$name dynamic",
 	"Segment Routing Policy Candidate Path\n"
 	"Segment Routing Policy Candidate Path Preference\n"
 	"Administrative Preference\n"
+	"Segment Routing Policy Candidate Path Discriminator\n"
+	"Discriminator\n"
 	"Segment Routing Policy Candidate Path Name\n"
 	"Symbolic Name\n"
 	"Dynamic Path\n")
 {
 	char xpath[XPATH_CANDIDATE_BASELEN];
 	int ret;
+	uint32_t discriminator_uint32;
+	char discriminator_tmp[11];
 
-	snprintf(xpath, sizeof(xpath), "%s/candidate-path[preference='%s']",
-		 VTY_CURR_XPATH, preference_str);
+	if (!discriminator_str) {
+		discriminator_uint32 = rand();
+		snprintf(discriminator_tmp, sizeof(discriminator_tmp), "%u",
+			 discriminator_uint32);
+	} else {
+		strlcpy(discriminator_tmp, discriminator_str,
+			sizeof(discriminator_tmp));
+	}
 
-	nb_cli_enqueue_change(vty, ".", NB_OP_CREATE, preference_str);
+	snprintf(
+		xpath, sizeof(xpath),
+		"%s/candidate-path[protocol-origin='local'][originator='config'][discriminator='%s']",
+		VTY_CURR_XPATH, discriminator_tmp);
+
+	nb_cli_enqueue_change(vty, ".", NB_OP_CREATE, NULL);
 	nb_cli_enqueue_change(vty, "./name", NB_OP_MODIFY, name);
-	nb_cli_enqueue_change(vty, "./protocol-origin", NB_OP_MODIFY, "local");
-	nb_cli_enqueue_change(vty, "./originator", NB_OP_MODIFY, "config");
+	nb_cli_enqueue_change(vty, "./preference", NB_OP_MODIFY,
+			      preference_str);
 	nb_cli_enqueue_change(vty, "./type", NB_OP_MODIFY, "dynamic");
-	ret = nb_cli_apply_changes(vty, "./candidate-path[preference='%s']",
-				   preference_str);
+	ret = nb_cli_apply_changes(
+		vty,
+		"./candidate-path[protocol-origin='local'][originator='config'][discriminator='%s']",
+		discriminator_tmp);
 
 	if (ret == CMD_SUCCESS)
 		VTY_PUSH_XPATH(SR_CANDIDATE_DYN_NODE, xpath);
@@ -724,6 +758,7 @@ DEFPY(srte_policy_no_candidate,
       srte_policy_no_candidate_cmd,
       "no candidate-path\
 	preference (0-4294967295)$preference\
+	discriminator (0-4294967295)$discriminator\
 	[name WORD\
 	<\
 	  explicit segment-list WORD\
@@ -733,6 +768,8 @@ DEFPY(srte_policy_no_candidate,
       "Segment Routing Policy Candidate Path\n"
       "Segment Routing Policy Candidate Path Preference\n"
       "Administrative Preference\n"
+      "Segment Routing Policy Candidate Path Discriminator\n"
+      "Discriminator\n"
       "Segment Routing Policy Candidate Path Name\n"
       "Symbolic Name\n"
       "Explicit Path\n"
@@ -742,8 +779,10 @@ DEFPY(srte_policy_no_candidate,
 {
 	nb_cli_enqueue_change(vty, ".", NB_OP_DESTROY, NULL);
 
-	return nb_cli_apply_changes(vty, "./candidate-path[preference='%s']",
-				    preference_str);
+	return nb_cli_apply_changes(
+		vty,
+		"./candidate-path[protocol-origin='local'][originator='config'][discriminator='%s']",
+		discriminator_str);
 }
 
 DEFPY(srte_candidate_objfun,

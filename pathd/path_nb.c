@@ -179,21 +179,9 @@ const struct frr_yang_module_info frr_pathd_info = {
 			}
 		},
 		{
-			.xpath = "/frr-pathd:pathd/srte/policy/candidate-path/protocol-origin",
+			.xpath = "/frr-pathd:pathd/srte/policy/candidate-path/preference",
 			.cbs = {
-				.modify = pathd_srte_policy_candidate_path_protocol_origin_modify,
-			}
-		},
-		{
-			.xpath = "/frr-pathd:pathd/srte/policy/candidate-path/originator",
-			.cbs = {
-				.modify = pathd_srte_policy_candidate_path_originator_modify,
-			}
-		},
-		{
-			.xpath = "/frr-pathd:pathd/srte/policy/candidate-path/discriminator",
-			.cbs = {
-				.get_elem = pathd_srte_policy_candidate_path_discriminator_get_elem,
+				.modify = pathd_srte_policy_candidate_path_preference_modify,
 			}
 		},
 		{

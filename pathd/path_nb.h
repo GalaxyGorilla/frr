@@ -91,12 +91,8 @@ void pathd_srte_policy_candidate_path_objfun_apply_finish(
 struct yang_data *
 pathd_srte_policy_candidate_path_is_best_candidate_path_get_elem(
 	struct nb_cb_get_elem_args *args);
-int pathd_srte_policy_candidate_path_protocol_origin_modify(
+int pathd_srte_policy_candidate_path_preference_modify(
 	struct nb_cb_modify_args *args);
-int pathd_srte_policy_candidate_path_originator_modify(
-	struct nb_cb_modify_args *args);
-struct yang_data *pathd_srte_policy_candidate_path_discriminator_get_elem(
-	struct nb_cb_get_elem_args *args);
 int pathd_srte_policy_candidate_path_type_modify(
 	struct nb_cb_modify_args *args);
 int pathd_srte_policy_candidate_path_segment_list_name_modify(

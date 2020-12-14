@@ -4,20 +4,20 @@
       "policy": [
         {
           "color": 1,
-          "endpoint": "6.6.6.6",
+          "endpoint": "1.1.1.1",
           "is-operational": true,
           "candidate-path": [
             {
               "protocol-origin": "local",
               "originator": "config",
               "discriminator": 1,
-              "is-best-candidate-path": false
+              "is-best-candidate-path": true
             },
             {
               "protocol-origin": "local",
               "originator": "config",
               "discriminator": 2,
-              "is-best-candidate-path": true
+              "is-best-candidate-path": false
             }
           ]
         }

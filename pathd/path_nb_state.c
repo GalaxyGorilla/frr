@@ -27,6 +27,7 @@
 
 #include "pathd/pathd.h"
 #include "pathd/path_nb.h"
+#include "pathd/path_debug.h"
 
 /*
  * XPath: /frr-pathd:pathd/srte/segment-list
@@ -142,10 +143,17 @@ int pathd_srte_policy_candidate_path_get_keys(struct nb_cb_get_keys_args *args)
 {
 	const struct srte_candidate *candidate =
 		(struct srte_candidate *)args->list_entry;
+	const char *protocol_origin_str;
 
-	args->keys->num = 1;
-	snprintf(args->keys->key[0], sizeof(args->keys->key[0]), "%u",
-		 candidate->preference);
+	args->keys->num = 3;
+	protocol_origin_str =
+		srte_protocol_origin_name(candidate->protocol_origin);
+	snprintf(args->keys->key[0], sizeof(args->keys->key[0]), "%s",
+		 protocol_origin_str);
+	snprintf(args->keys->key[1], sizeof(args->keys->key[1]), "%s",
+		 candidate->originator);
+	snprintf(args->keys->key[2], sizeof(args->keys->key[2]), "%u",
+		 candidate->discriminator);
 
 	return NB_OK;
 }
@@ -155,11 +163,17 @@ const void *pathd_srte_policy_candidate_path_lookup_entry(
 {
 	struct srte_policy *policy =
 		(struct srte_policy *)args->parent_list_entry;
-	uint32_t preference;
 
-	preference = yang_str2uint32(args->keys->key[0]);
+	int protocol_origin;
+	const char *originator;
+	uint32_t discriminator;
 
-	return srte_candidate_find(policy, preference);
+	protocol_origin = yang_str2int32(args->keys->key[0]);
+	originator = args->keys->key[1];
+	discriminator = yang_str2uint32(args->keys->key[2]);
+
+	return srte_candidate_find(policy, protocol_origin, originator,
+				   discriminator);
 }
 
 /*
@@ -174,16 +188,4 @@ pathd_srte_policy_candidate_path_is_best_candidate_path_get_elem(
 
 	return yang_data_new_bool(
 		args->xpath, CHECK_FLAG(candidate->flags, F_CANDIDATE_BEST));
-}
-
-/*
- * XPath: /frr-pathd:pathd/srte/policy/candidate-path/discriminator
- */
-struct yang_data *pathd_srte_policy_candidate_path_discriminator_get_elem(
-	struct nb_cb_get_elem_args *args)
-{
-	struct srte_candidate *candidate =
-		(struct srte_candidate *)args->list_entry;
-
-	return yang_data_new_uint32(args->xpath, candidate->discriminator);
 }

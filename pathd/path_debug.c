@@ -40,11 +40,11 @@ const char *srte_protocol_origin_name(enum srte_protocol_origin origin)
 	case SRTE_ORIGIN_UNDEFINED:
 		return "UNDEFINED";
 	case SRTE_ORIGIN_PCEP:
-		return "PCEP";
+		return "pcep";
 	case SRTE_ORIGIN_BGP:
-		return "BGP";
+		return "bgp";
 	case SRTE_ORIGIN_LOCAL:
-		return "LOCAL";
+		return "local";
 	default:
 		return "UNKNOWN";
 	}

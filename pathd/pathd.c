@@ -78,7 +78,7 @@ struct srte_segment_list_head srte_segment_lists =
 static inline int srte_candidate_compare(const struct srte_candidate *a,
 					 const struct srte_candidate *b)
 {
-	return a->preference - b->preference;
+	return a->discriminator - b->discriminator;
 }
 RB_GENERATE(srte_candidate_head, srte_candidate, entry, srte_candidate_compare)
 
@@ -315,16 +315,23 @@ static struct srte_candidate *
 srte_policy_best_candidate(const struct srte_policy *policy)
 {
 	struct srte_candidate *candidate;
+	struct srte_candidate *best_candidate = NULL;
 
-	RB_FOREACH_REVERSE (candidate, srte_candidate_head,
-			    &policy->candidate_paths) {
-		/* search for highest preference with existing segment list */
-		if (!CHECK_FLAG(candidate->flags, F_CANDIDATE_DELETED)
-		    && candidate->lsp->segment_list)
-			return candidate;
+	RB_FOREACH (candidate, srte_candidate_head, &policy->candidate_paths) {
+		/*
+		 * If this candidate path was deleted or has no segment list
+		 * yet, then there's nothing to do.
+		 */
+		if (CHECK_FLAG(candidate->flags, F_CANDIDATE_DELETED)
+		    || !candidate->lsp->segment_list)
+			continue;
+
+		if (!best_candidate
+		    || candidate->preference > best_candidate->preference)
+			best_candidate = candidate;
 	}
 
-	return NULL;
+	return best_candidate;
 }
 
 /**
@@ -465,11 +472,15 @@ void srte_policy_apply_changes(struct srte_policy *policy)
  * Adds a candidate path to a policy.
  *
  * @param policy The policy the candidate path should be added to
- * @param preference The preference of the candidate path to be added
+ * @param protocol_origin The Candidate Path Protocol-Origin
+ * @param originator      The Candidate Path Originator
+ * @param discriminator   The Candidate Path Discriminator
  * @return The added candidate path
  */
-struct srte_candidate *srte_candidate_add(struct srte_policy *policy,
-					  uint32_t preference)
+struct srte_candidate *
+srte_candidate_add(struct srte_policy *policy,
+		   enum srte_protocol_origin protocol_origin,
+		   const char *originator, uint32_t discriminator)
 {
 	struct srte_candidate *candidate;
 	struct srte_lsp *lsp;
@@ -477,13 +488,22 @@ struct srte_candidate *srte_candidate_add(struct srte_policy *policy,
 	candidate = XCALLOC(MTYPE_PATH_SR_CANDIDATE, sizeof(*candidate));
 	lsp = XCALLOC(MTYPE_PATH_SR_CANDIDATE, sizeof(*lsp));
 
-	candidate->preference = preference;
-	candidate->policy = policy;
-	candidate->type = SRTE_CANDIDATE_TYPE_UNDEFINED;
-	candidate->discriminator = rand();
-
 	lsp->candidate = candidate;
 	candidate->lsp = lsp;
+
+	candidate->protocol_origin = protocol_origin;
+	strlcpy(candidate->originator, originator,
+		sizeof(char) * SRTE_ORIGINATOR_MAX_STR_LEN);
+	candidate->discriminator = discriminator;
+
+	/* copy keys to the LSP */
+	candidate->lsp->protocol_origin = protocol_origin;
+	strlcpy(candidate->lsp->originator, originator,
+		sizeof(char) * SRTE_ORIGINATOR_MAX_STR_LEN);
+	candidate->lsp->discriminator = discriminator;
+
+	candidate->policy = policy;
+	candidate->type = SRTE_CANDIDATE_TYPE_UNDEFINED;
 
 	RB_INSERT(srte_candidate_head, &policy->candidate_paths, candidate);
 
@@ -857,15 +877,23 @@ void srte_candidate_unset_affinity_filter(struct srte_candidate *candidate,
  * Searches for a candidate path of the given policy.
  *
  * @param policy The policy to search for candidate path
- * @param preference The preference of the candidate path you are looking for
+ * @param protocol_origin The Candidate Path Protocol-Origin
+ * @param originator      The Candidate Path Originator
+ * @param discriminator   The Candidate Path Discriminator
  * @return The candidate path if found, NULL otherwise
  */
-struct srte_candidate *srte_candidate_find(struct srte_policy *policy,
-					   uint32_t preference)
+struct srte_candidate *
+srte_candidate_find(struct srte_policy *policy,
+		    enum srte_protocol_origin protocol_origin,
+		    const char *originator, uint32_t discriminator)
 {
 	struct srte_candidate search;
 
-	search.preference = preference;
+	search.protocol_origin = protocol_origin;
+	strlcpy(search.originator, originator,
+		sizeof(char) * SRTE_ORIGINATOR_MAX_STR_LEN);
+	search.discriminator = discriminator;
+
 	return RB_FIND(srte_candidate_head, &policy->candidate_paths, &search);
 }
 

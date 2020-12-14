@@ -8,8 +8,9 @@
           "is-operational": true,
           "candidate-path": [
             {
-              "preference": 100,
-              "discriminator": "*",
+              "protocol-origin": "local",
+              "originator": "config",
+              "discriminator": 1,
               "is-best-candidate-path": true
             }
           ]

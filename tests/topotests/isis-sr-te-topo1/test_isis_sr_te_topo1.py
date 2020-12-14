@@ -226,21 +226,21 @@ def cmp_json_output(rname, command, reference, exact=False):
 def cmp_json_output_exact(rname, command, reference):
     return cmp_json_output(rname, command, reference, True)
 
-def add_candidate_path(rname, endpoint, pref, name, segment_list='default'):
+def add_candidate_path(rname, endpoint, pref, discriminator, name, segment_list='default'):
     get_topogen().net[rname].cmd(''' \
         vtysh -c "conf t" \
               -c "segment-routing" \
               -c "traffic-eng" \
               -c "policy color 1 endpoint ''' + endpoint + '''" \
-              -c "candidate-path preference ''' + str(pref) + ''' name ''' + name + ''' explicit segment-list ''' + segment_list + '''"''')
+              -c "candidate-path preference ''' + str(pref) + ''' discriminator ''' + str(discriminator) + ''' name ''' + name + ''' explicit segment-list ''' + segment_list + '''"''')
 
-def delete_candidate_path(rname, endpoint, pref):
+def delete_candidate_path(rname, endpoint, pref, discriminator):
     get_topogen().net[rname].cmd(''' \
         vtysh -c "conf t" \
               -c "segment-routing" \
               -c "traffic-eng" \
               -c "policy color 1 endpoint ''' + endpoint + '''" \
-              -c "no candidate-path preference ''' + str(pref) + '''"''')
+              -c "no candidate-path preference ''' + str(pref) + ''' discriminator ''' + str(discriminator) + '''"''')
 
 def add_segment(rname, name, index, label):
     get_topogen().net[rname].cmd(''' \
@@ -303,27 +303,30 @@ def test_srte_add_candidate_check_mpls_table_step1():
     setup_testcase("Test (step 1): check MPLS table regarding the added Candidate Path")
 
     for rname, endpoint in [('rt1', '6.6.6.6'), ('rt6', '1.1.1.1')]:
-        add_candidate_path(rname, endpoint, 100, 'default')
+        add_candidate_path(rname, endpoint, 100, 1, 'default')
         cmp_json_output(rname,
                         "show mpls table json",
                         "step1/show_mpls_table_with_candidate.ref")
-        delete_candidate_path(rname, endpoint, 100)
+        delete_candidate_path(rname, endpoint, 100, 1)
+        cmp_json_output(rname,
+                        "show mpls table json",
+                        "step1/show_mpls_table_without_candidate.ref")
 
 def test_srte_reinstall_sr_policy_check_mpls_table_step1():
     setup_testcase("Test (step 1): check MPLS table after the SR Policy was removed and reinstalled")
 
     for rname, endpoint, bsid in [('rt1', '6.6.6.6', 1111), ('rt6', '1.1.1.1', 6666)]:
-        add_candidate_path(rname, endpoint, 100, 'default')
+        add_candidate_path(rname, endpoint, 100, 1, 'default')
         delete_sr_policy(rname, endpoint)
         cmp_json_output(rname,
                         "show mpls table json",
                         "step1/show_mpls_table_without_candidate.ref")
         create_sr_policy(rname, endpoint, bsid)
-        add_candidate_path(rname, endpoint, 100, 'default')
+        add_candidate_path(rname, endpoint, 100, 1, 'default')
         cmp_json_output(rname,
                         "show mpls table json",
                         "step1/show_mpls_table_with_candidate.ref")
-        delete_candidate_path(rname, endpoint, 100)
+        delete_candidate_path(rname, endpoint, 100, 1)
 
 #
 # Step 2
@@ -342,7 +345,7 @@ def test_srte_add_candidate_check_operational_data_step2():
     setup_testcase("Test (step 2): add single Candidate Path, SR Policy should be operational")
 
     for rname, endpoint in [('rt1', '6.6.6.6'), ('rt6', '1.1.1.1')]:
-        add_candidate_path(rname, endpoint, 100, 'default')
+        add_candidate_path(rname, endpoint, 100, 1, 'default')
         cmp_json_output(rname,
                         "show yang operational-data /frr-pathd:pathd pathd",
                         "step2/show_operational_data_with_candidate.ref")
@@ -351,7 +354,7 @@ def test_srte_config_remove_candidate_check_operational_data_step2():
     setup_testcase("Test (step 2): remove single Candidate Path, SR Policy should not be operational anymore")
 
     for rname, endpoint in [('rt1', '6.6.6.6'), ('rt6', '1.1.1.1')]:
-        delete_candidate_path(rname, endpoint, 100)
+        delete_candidate_path(rname, endpoint, 100, 1)
         cmp_json_output_exact(rname,
                               "show yang operational-data /frr-pathd:pathd pathd",
                               "step2/show_operational_data.ref")
@@ -365,43 +368,43 @@ def test_srte_add_two_candidates_step3():
     setup_testcase("Test (step 3): second Candidate Path has higher Priority")
 
     for rname, endpoint in [('rt1', '6.6.6.6'), ('rt6', '1.1.1.1')]:
-        for pref, cand_name in [('100', 'first'), ('200', 'second')]:
-            add_candidate_path(rname, endpoint, pref, cand_name)
+        for pref, discriminator, cand_name in [('100', 1, 'first'), ('200', 2, 'second')]:
+            add_candidate_path(rname, endpoint, pref, discriminator, cand_name)
         cmp_json_output(rname,
                         "show yang operational-data /frr-pathd:pathd pathd",
                         "step3/show_operational_data_with_two_candidates.ref")
 
     # cleanup
     for rname, endpoint in [('rt1', '6.6.6.6'), ('rt6', '1.1.1.1')]:
-        for pref in ['100', '200']:
-            delete_candidate_path(rname, endpoint, pref)
+        for pref, discriminator in [('100', 1), ('200', 2)]:
+            delete_candidate_path(rname, endpoint, pref, discriminator)
 
 def test_srte_add_two_candidates_with_reverse_priority_step3():
     setup_testcase("Test (step 3): second Candidate Path has lower Priority")
 
     # Use reversed priorities here
     for rname, endpoint in [('rt1', '6.6.6.6'), ('rt6', '1.1.1.1')]:
-        for pref, cand_name in [('200', 'first'), ('100', 'second')]:
-            add_candidate_path(rname, endpoint, pref, cand_name)
+        for pref, discriminator, cand_name in [('200', 1, 'first'), ('100', 2, 'second')]:
+            add_candidate_path(rname, endpoint, pref, discriminator, cand_name)
         cmp_json_output(rname,
                         "show yang operational-data /frr-pathd:pathd pathd",
-                        "step3/show_operational_data_with_two_candidates.ref")
+                        "step3/show_operational_data_with_reverse_candidates.ref")
 
     # cleanup
     for rname, endpoint in [('rt1', '6.6.6.6'), ('rt6', '1.1.1.1')]:
-        for pref in ['100', '200']:
-            delete_candidate_path(rname, endpoint, pref)
+        for pref in [('100', 2), ('200', 1)]:
+            delete_candidate_path(rname, endpoint, pref, discriminator)
 
 def test_srte_remove_best_candidate_step3():
     setup_testcase("Test (step 3): delete the Candidate Path with higher priority")
 
     for rname, endpoint in [('rt1', '6.6.6.6'), ('rt6', '1.1.1.1')]:
-        for pref, cand_name in [('100', 'first'), ('200', 'second')]:
-            add_candidate_path(rname, endpoint, pref, cand_name)
+        for pref, discriminator, cand_name in [('100', 1, 'first'), ('200', 2, 'second')]:
+            add_candidate_path(rname, endpoint, pref, discriminator, cand_name)
 
     # Delete candidate with higher priority
     for rname, endpoint in [('rt1', '6.6.6.6'), ('rt6', '1.1.1.1')]:
-        delete_candidate_path(rname, endpoint, 200)
+        delete_candidate_path(rname, endpoint, 200, 2)
 
     # Candidate with lower priority should get active now
     for rname, endpoint in [('rt1', '6.6.6.6'), ('rt6', '1.1.1.1')]:
@@ -409,7 +412,7 @@ def test_srte_remove_best_candidate_step3():
                         "show yang operational-data /frr-pathd:pathd pathd",
                         "step3/show_operational_data_with_single_candidate.ref")
         # cleanup
-        delete_candidate_path(rname, endpoint, 100)
+        delete_candidate_path(rname, endpoint, 100, 1)
 
 #
 # Step 4
@@ -420,18 +423,18 @@ def test_srte_change_segment_list_check_mpls_table_step4():
     setup_testcase("Test (step 4): check MPLS table for changed Segment List")
 
     for rname, endpoint in [('rt1', '6.6.6.6'), ('rt6', '1.1.1.1')]:
-        add_candidate_path(rname, endpoint, 100, 'default')
+        add_candidate_path(rname, endpoint, 100, 1, 'default')
 	# now change the segment list name
-        add_candidate_path(rname, endpoint, 100, 'default', 'test')
+        add_candidate_path(rname, endpoint, 100, 1, 'default', 'test')
         cmp_json_output(rname,
                         "show mpls table json",
                         "step4/show_mpls_table.ref")
-        delete_candidate_path(rname, endpoint, 100)
+        delete_candidate_path(rname, endpoint, 100, 1)
 
 def test_srte_segment_list_add_segment_check_mpls_table_step4():
     setup_testcase("Test (step 4): check MPLS table for added (then changed and finally deleted) segment")
 
-    add_candidate_path('rt1', '6.6.6.6', 100, 'default', 'test')
+    add_candidate_path('rt1', '6.6.6.6', 100, 1, 'default', 'test')
 
     # first add a new segment
     add_segment('rt1', 'test', 25, 16050)
@@ -450,7 +453,7 @@ def test_srte_segment_list_add_segment_check_mpls_table_step4():
     cmp_json_output('rt1',
                     "show mpls table json",
                     "step4/show_mpls_table.ref")
-    delete_candidate_path('rt1', '6.6.6.6', 100)
+    delete_candidate_path('rt1', '6.6.6.6', 100, 1)
 
 #
 # Step 5
@@ -476,18 +479,18 @@ def test_srte_route_map_with_sr_policy_check_nextop_step5():
                         "show ip route bgp json",
                         "step5/show_ip_route_bgp_inactive_srte.ref")
 
-        add_candidate_path('rt1', '6.6.6.6', 100, 'default')
+        add_candidate_path('rt1', '6.6.6.6', 100, 1, 'default')
         cmp_json_output('rt1',
                         "show ip route bgp json",
                         "step5/show_ip_route_bgp_active_srte.ref")
 
-        delete_candidate_path('rt1', '6.6.6.6', 100)
+        delete_candidate_path('rt1', '6.6.6.6', 100, 1)
 
 def test_srte_route_map_with_sr_policy_reinstall_prefix_sid_check_nextop_step5():
     setup_testcase("Test (step 5): remove and re-install prefix SID on fist path element and check SR Policy activity")
 
     # first add a candidate path so the SR Policy is active
-    add_candidate_path('rt1', '6.6.6.6', 100, 'default')
+    add_candidate_path('rt1', '6.6.6.6', 100, 1, 'default')
     cmp_json_output('rt1',
                     "show yang operational-data /frr-pathd:pathd pathd",
                     "step5/show_operational_data_active.ref")
@@ -510,6 +513,8 @@ def test_srte_route_map_with_sr_policy_reinstall_prefix_sid_check_nextop_step5()
     cmp_json_output('rt1',
                     "show ip route bgp json",
                     "step5/show_ip_route_bgp_active_srte.ref")
+
+    delete_candidate_path('rt1', '6.6.6.6', 100, 1)
 
 # Memory leak test template
 def test_memory_leak():
