@@ -146,13 +146,20 @@ struct path *candidate_to_path(struct srte_candidate *candidate)
 		}
 	}
 	*path = (struct path){
-		.nbkey = (struct lsp_nb_key){.color = policy->color,
-					     .endpoint = policy->endpoint,
-					     .preference =
-						     candidate->preference},
+		.nbkey =
+			(struct lsp_nb_key){
+				.color = policy->color,
+				.endpoint = policy->endpoint,
+				.protocol_origin = candidate->protocol_origin,
+				.originator = XSTRDUP(
+					MTYPE_PCEP,
+					(const char *)&candidate->originator),
+				.discriminator = candidate->discriminator,
+			},
 		.create_origin = lsp->protocol_origin,
 		.update_origin = update_origin,
 		.originator = originator,
+		.preference = candidate->preference,
 		.plsp_id = 0,
 		.name = name,
 		.type = candidate->type,
@@ -284,7 +291,6 @@ path_pcep_config_list_path_hops(struct srte_segment_list *segment_list)
 int path_pcep_config_update_path(struct path *path)
 {
 	assert(path != NULL);
-	assert(path->nbkey.preference != 0);
 	assert(path->nbkey.endpoint.ipa_type == IPADDR_V4);
 
 	struct path_hop *hop;
@@ -370,7 +376,8 @@ struct srte_candidate *lookup_candidate(struct lsp_nb_key *key)
 	policy = srte_policy_find(key->color, &key->endpoint);
 	if (policy == NULL)
 		return NULL;
-	return srte_candidate_find(policy, key->preference);
+	return srte_candidate_find(policy, key->protocol_origin,
+				   key->originator, key->discriminator);
 }
 
 char *candidate_name(struct srte_candidate *candidate)

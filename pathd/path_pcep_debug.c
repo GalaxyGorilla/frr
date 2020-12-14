@@ -1113,8 +1113,19 @@ void _format_path(int ps, struct path *path)
 			PATHD_FORMAT("%*sendpoint: NONE\n", ps3, "");
 			break;
 		}
-		PATHD_FORMAT("%*spreference: %u\n", ps3, "",
-			     path->nbkey.preference);
+
+		PATHD_FORMAT(
+			"%*sprotocol-origin: %s\n", ps2, "",
+			srte_protocol_origin_name(path->nbkey.protocol_origin));
+
+		PATHD_FORMAT("%*soriginator: %s\n", ps2, "",
+			     path->nbkey.originator ? path->nbkey.originator
+						    : "UNDEFINED");
+
+		PATHD_FORMAT("%*sdiscriminator: %u\n", ps2, "",
+			     path->nbkey.discriminator);
+
+		PATHD_FORMAT("%*spreference: %u\n", ps3, "", path->preference);
 
 		if (path->sender.ipa_type == IPADDR_V4) {
 			PATHD_FORMAT("%*ssender: %pI4\n", ps2, "",

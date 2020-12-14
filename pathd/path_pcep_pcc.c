@@ -1760,7 +1760,7 @@ bool has_pending_req_for(struct pcc_state *pcc_state, struct path *path)
 static uint32_t hash_nbkey(const struct lsp_nb_key *nbkey)
 {
 	uint32_t hash;
-	hash = jhash_2words(nbkey->color, nbkey->preference, 0x55aa5a5a);
+	hash = jhash_2words(nbkey->color, nbkey->discriminator, 0x55aa5a5a);
 	switch (nbkey->endpoint.ipa_type) {
 	case IPADDR_V4:
 		return jhash(&nbkey->endpoint.ipaddr_v4,
@@ -1779,7 +1779,7 @@ static int cmp_nbkey(const struct lsp_nb_key *a, const struct lsp_nb_key *b)
 	int cmp = ipaddr_cmp(&a->endpoint, &b->endpoint);
 	if (cmp != 0)
 		return cmp;
-	CMP_RETURN(a->preference, b->preference);
+	CMP_RETURN(a->discriminator, b->discriminator);
 	return 0;
 }
 

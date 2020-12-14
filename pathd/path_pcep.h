@@ -129,9 +129,14 @@ struct pce_opts_cli {
 };
 
 struct lsp_nb_key {
+	/* SR Policy keys */
 	uint32_t color;
 	struct ipaddr endpoint;
-	uint32_t preference;
+
+	/* Candidate Path keys */
+	enum srte_protocol_origin protocol_origin;
+	char *originator;
+	uint32_t discriminator;
 };
 
 struct sid_mpls {
@@ -240,6 +245,8 @@ struct path {
 
 	/* Path's binding SID */
 	mpls_label_t binding_sid;
+	/* The preference of the path */
+	uint32_t preference;
 	/* The name of the path */
 	const char *name;
 	/* The request identifier from the PCE, when getting a path from the
