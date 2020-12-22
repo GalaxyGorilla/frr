@@ -206,6 +206,11 @@ module frr-pathd {
             config false;
             description "Originator of the candidate path";
           }
+          leaf config-discriminator {
+            type uint32;
+            mandatory true;
+            description "Candidate path distinguisher";
+          }
           leaf discriminator {
             type uint32;
             config false;

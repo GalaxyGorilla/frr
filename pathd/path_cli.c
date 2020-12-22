@@ -517,22 +517,41 @@ void cli_show_srte_policy_binding_sid(struct vty *vty,
  */
 DEFPY(srte_policy_candidate_exp,
       srte_policy_candidate_exp_cmd,
-      "candidate-path preference (0-4294967295)$preference name WORD$name \
-	 explicit segment-list WORD$list_name",
+      "candidate-path preference (0-4294967295)$preference \
+	[discriminator (0-4294967295)$discriminator] \
+	name WORD$name \
+	explicit segment-list WORD$list_name",
       "Segment Routing Policy Candidate Path\n"
       "Segment Routing Policy Candidate Path Preference\n"
       "Administrative Preference\n"
+      "Segment Routing Policy Candidate Path Discriminator\n"
+      "Discriminator\n"
       "Segment Routing Policy Candidate Path Name\n"
       "Symbolic Name\n"
       "Explicit Path\n"
       "List of SIDs\n"
       "Name of the Segment List\n")
 {
+	uint32_t discriminator_rand;
+	char discriminator_buf[11];
+
 	nb_cli_enqueue_change(vty, ".", NB_OP_CREATE, preference_str);
 	nb_cli_enqueue_change(vty, "./name", NB_OP_MODIFY, name);
 	nb_cli_enqueue_change(vty, "./type", NB_OP_MODIFY, "explicit");
 	nb_cli_enqueue_change(vty, "./segment-list-name", NB_OP_MODIFY,
 			      list_name);
+
+	if (discriminator_str) {
+		nb_cli_enqueue_change(vty, "./config-discriminator",
+				      NB_OP_MODIFY, discriminator_str);
+	} else {
+		discriminator_rand = rand();
+		snprintf(discriminator_buf, sizeof(discriminator_buf), "%u",
+			 discriminator_rand);
+		nb_cli_enqueue_change(vty, "./config-discriminator",
+				      NB_OP_MODIFY, discriminator_buf);
+	}
+
 	return nb_cli_apply_changes(vty, "./candidate-path[preference='%s']",
 				    preference_str);
 }
@@ -540,15 +559,21 @@ DEFPY(srte_policy_candidate_exp,
 DEFPY_NOSH(
 	srte_policy_candidate_dyn,
 	srte_policy_candidate_dyn_cmd,
-	"candidate-path preference (0-4294967295)$preference name WORD$name dynamic",
+	"candidate-path preference (0-4294967295)$preference \
+	[discriminator (0-4294967295)$discriminator] \
+	name WORD$name dynamic",
 	"Segment Routing Policy Candidate Path\n"
 	"Segment Routing Policy Candidate Path Preference\n"
+        "Segment Routing Policy Candidate Path Discriminator\n"
+        "Discriminator\n"
 	"Administrative Preference\n"
 	"Segment Routing Policy Candidate Path Name\n"
 	"Symbolic Name\n"
 	"Dynamic Path\n")
 {
 	char xpath[XPATH_CANDIDATE_BASELEN];
+	uint32_t discriminator_rand;
+	char discriminator_buf[11];
 	int ret;
 
 	snprintf(xpath, sizeof(xpath), "%s/candidate-path[preference='%s']",
@@ -559,6 +584,17 @@ DEFPY_NOSH(
 	nb_cli_enqueue_change(vty, "./type", NB_OP_MODIFY, "dynamic");
 	ret = nb_cli_apply_changes(vty, "./candidate-path[preference='%s']",
 				   preference_str);
+
+	if (discriminator_str) {
+		nb_cli_enqueue_change(vty, "./config-discriminator",
+				      NB_OP_MODIFY, discriminator_str);
+	} else {
+		discriminator_rand = rand();
+		snprintf(discriminator_buf, sizeof(discriminator_buf), "%u",
+			 discriminator_rand);
+		nb_cli_enqueue_change(vty, "./config-discriminator",
+				      NB_OP_MODIFY, discriminator_buf);
+	}
 
 	if (ret == CMD_SUCCESS)
 		VTY_PUSH_XPATH(SR_CANDIDATE_DYN_NODE, xpath);
@@ -720,6 +756,7 @@ DEFPY(srte_policy_no_candidate,
       srte_policy_no_candidate_cmd,
       "no candidate-path\
 	preference (0-4294967295)$preference\
+	[discriminator (0-4294967295)$discriminator]\
 	[name WORD\
 	<\
 	  explicit segment-list WORD\
@@ -729,6 +766,8 @@ DEFPY(srte_policy_no_candidate,
       "Segment Routing Policy Candidate Path\n"
       "Segment Routing Policy Candidate Path Preference\n"
       "Administrative Preference\n"
+      "Segment Routing Policy Candidate Path Discriminator\n"
+      "Discriminator\n"
       "Segment Routing Policy Candidate Path Name\n"
       "Symbolic Name\n"
       "Explicit Path\n"

@@ -372,6 +372,27 @@ int pathd_srte_policy_candidate_path_destroy(struct nb_cb_destroy_args *args)
 }
 
 /*
+ * XPath: /frr-pathd:pathd/srte/policy/candidate-path/config-discriminator
+ */
+int pathd_srte_policy_candidate_path_config_discriminator_modify(
+	struct nb_cb_modify_args *args)
+{
+	struct srte_candidate *candidate;
+	uint32_t discriminator;
+
+	if (args->event != NB_EV_APPLY)
+		return NB_OK;
+
+	candidate = nb_running_get_entry(args->dnode, NULL, true);
+
+	discriminator = yang_dnode_get_uint32(args->dnode, NULL);
+	candidate->discriminator = discriminator;
+	SET_FLAG(candidate->flags, F_CANDIDATE_MODIFIED);
+
+	return NB_OK;
+}
+
+/*
  * XPath: /frr-pathd:pathd/srte/policy/candidate-path/name
  */
 int pathd_srte_policy_candidate_path_name_modify(struct nb_cb_modify_args *args)

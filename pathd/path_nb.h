@@ -57,6 +57,8 @@ struct yang_data *
 pathd_srte_policy_is_operational_get_elem(struct nb_cb_get_elem_args *args);
 int pathd_srte_policy_candidate_path_create(struct nb_cb_create_args *args);
 int pathd_srte_policy_candidate_path_destroy(struct nb_cb_destroy_args *args);
+int pathd_srte_policy_candidate_path_config_discriminator_modify(
+	struct nb_cb_modify_args *args);
 int pathd_srte_policy_candidate_path_name_modify(
 	struct nb_cb_modify_args *args);
 const void *
