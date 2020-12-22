@@ -181,13 +181,13 @@ const struct frr_yang_module_info frr_pathd_info = {
 		{
 			.xpath = "/frr-pathd:pathd/srte/policy/candidate-path/protocol-origin",
 			.cbs = {
-				.modify = pathd_srte_policy_candidate_path_protocol_origin_modify,
+				.get_elem = pathd_srte_policy_candidate_path_protocol_origin_get_elem,
 			}
 		},
 		{
 			.xpath = "/frr-pathd:pathd/srte/policy/candidate-path/originator",
 			.cbs = {
-				.modify = pathd_srte_policy_candidate_path_originator_modify,
+				.get_elem = pathd_srte_policy_candidate_path_originator_get_elem,
 			}
 		},
 		{

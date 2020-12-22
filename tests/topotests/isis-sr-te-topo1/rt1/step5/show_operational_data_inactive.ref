@@ -9,6 +9,8 @@
           "candidate-path": [
             {
               "preference": 100,
+              "protocol-origin": "local",
+              "originator": "config",
               "discriminator": "*",
               "is-best-candidate-path": true
             }

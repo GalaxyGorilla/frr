@@ -530,8 +530,6 @@ DEFPY(srte_policy_candidate_exp,
 {
 	nb_cli_enqueue_change(vty, ".", NB_OP_CREATE, preference_str);
 	nb_cli_enqueue_change(vty, "./name", NB_OP_MODIFY, name);
-	nb_cli_enqueue_change(vty, "./protocol-origin", NB_OP_MODIFY, "local");
-	nb_cli_enqueue_change(vty, "./originator", NB_OP_MODIFY, "config");
 	nb_cli_enqueue_change(vty, "./type", NB_OP_MODIFY, "explicit");
 	nb_cli_enqueue_change(vty, "./segment-list-name", NB_OP_MODIFY,
 			      list_name);
@@ -558,8 +556,6 @@ DEFPY_NOSH(
 
 	nb_cli_enqueue_change(vty, ".", NB_OP_CREATE, preference_str);
 	nb_cli_enqueue_change(vty, "./name", NB_OP_MODIFY, name);
-	nb_cli_enqueue_change(vty, "./protocol-origin", NB_OP_MODIFY, "local");
-	nb_cli_enqueue_change(vty, "./originator", NB_OP_MODIFY, "config");
 	nb_cli_enqueue_change(vty, "./type", NB_OP_MODIFY, "dynamic");
 	ret = nb_cli_apply_changes(vty, "./candidate-path[preference='%s']",
 				   preference_str);

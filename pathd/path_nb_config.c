@@ -575,50 +575,6 @@ void pathd_srte_policy_candidate_path_objfun_apply_finish(
 }
 
 /*
- * XPath: /frr-pathd:pathd/srte/policy/candidate-path/protocol-origin
- */
-int pathd_srte_policy_candidate_path_protocol_origin_modify(
-	struct nb_cb_modify_args *args)
-{
-	struct srte_candidate *candidate;
-	enum srte_protocol_origin protocol_origin;
-
-	if (args->event != NB_EV_APPLY)
-		return NB_OK;
-
-	candidate = nb_running_get_entry(args->dnode, NULL, true);
-	protocol_origin = yang_dnode_get_enum(args->dnode, NULL);
-	candidate->protocol_origin = protocol_origin;
-	candidate->lsp->protocol_origin = protocol_origin;
-	SET_FLAG(candidate->flags, F_CANDIDATE_MODIFIED);
-
-	return NB_OK;
-}
-
-/*
- * XPath: /frr-pathd:pathd/srte/policy/candidate-path/originator
- */
-int pathd_srte_policy_candidate_path_originator_modify(
-	struct nb_cb_modify_args *args)
-{
-	struct srte_candidate *candidate;
-	const char *originator;
-
-	if (args->event != NB_EV_APPLY)
-		return NB_OK;
-
-	candidate = nb_running_get_entry(args->dnode, NULL, true);
-	originator = yang_dnode_get_string(args->dnode, NULL);
-	strlcpy(candidate->originator, originator,
-		sizeof(candidate->originator));
-	strlcpy(candidate->lsp->originator, originator,
-		sizeof(candidate->lsp->originator));
-	SET_FLAG(candidate->flags, F_CANDIDATE_MODIFIED);
-
-	return NB_OK;
-}
-
-/*
  * XPath: /frr-pathd:pathd/srte/policy/candidate-path/type
  */
 int pathd_srte_policy_candidate_path_type_modify(struct nb_cb_modify_args *args)

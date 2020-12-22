@@ -9,11 +9,15 @@
           "candidate-path": [
             {
               "preference": 100,
+              "protocol-origin": "local",
+              "originator": "config",
               "discriminator": "*",
               "is-best-candidate-path": false
             },
             {
               "preference": 200,
+              "protocol-origin": "local",
+              "originator": "config",
               "discriminator": "*",
               "is-best-candidate-path": true
             }

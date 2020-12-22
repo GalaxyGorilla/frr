@@ -177,6 +177,30 @@ pathd_srte_policy_candidate_path_is_best_candidate_path_get_elem(
 }
 
 /*
+ * XPath: /frr-pathd:pathd/srte/policy/candidate-path/protocol-origin
+ */
+struct yang_data *pathd_srte_policy_candidate_path_protocol_origin_get_elem(
+	struct nb_cb_get_elem_args *args)
+{
+	struct srte_candidate *candidate =
+		(struct srte_candidate *)args->list_entry;
+
+	return yang_data_new_enum(args->xpath, candidate->protocol_origin);
+}
+
+/*
+ * XPath: /frr-pathd:pathd/srte/policy/candidate-path/originator
+ */
+struct yang_data *pathd_srte_policy_candidate_path_originator_get_elem(
+	struct nb_cb_get_elem_args *args)
+{
+	struct srte_candidate *candidate =
+		(struct srte_candidate *)args->list_entry;
+
+	return yang_data_new_string(args->xpath, candidate->originator);
+}
+
+/*
  * XPath: /frr-pathd:pathd/srte/policy/candidate-path/discriminator
  */
 struct yang_data *pathd_srte_policy_candidate_path_discriminator_get_elem(

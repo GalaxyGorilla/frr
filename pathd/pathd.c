@@ -480,7 +480,13 @@ struct srte_candidate *srte_candidate_add(struct srte_policy *policy,
 	candidate->preference = preference;
 	candidate->policy = policy;
 	candidate->type = SRTE_CANDIDATE_TYPE_UNDEFINED;
+
+	candidate->protocol_origin = SRTE_ORIGIN_LOCAL;
+	strlcpy(candidate->originator, "config", sizeof(candidate->originator));
 	candidate->discriminator = rand();
+
+	lsp->protocol_origin = SRTE_ORIGIN_LOCAL;
+	strlcpy(lsp->originator, "config", sizeof(lsp->originator));
 
 	lsp->candidate = candidate;
 	candidate->lsp = lsp;
