@@ -400,6 +400,31 @@ def test_srte_reinstall_sr_policy_check_mpls_table_step1():
         delete_candidate_path(rname, endpoint, 100)
 
 
+def test_srte_interface_change_operational_status_step1():
+    setup_testcase(
+        "Test (step 1): check MPLS table after an interface on RT6 changes its operational status"
+    )
+
+    add_candidate_path("rt6", "1.1.1.1", 100, "default")
+    cmp_json_output(
+        "rt6", "show mpls table json", "step1/show_mpls_table_with_candidate.ref"
+    )
+
+    logger.info('Restarting interface eth-rt4 on rt6')
+
+    get_topogen().gears["rt6"].link_enable("eth-rt4", enabled=False)
+    cmp_json_output(
+        "rt6", "show mpls table json", "step1/show_mpls_table_with_candidate_if_down.ref"
+    )
+
+    get_topogen().gears["rt6"].link_enable("eth-rt4", enabled=True)
+    cmp_json_output(
+        "rt6", "show mpls table json", "step1/show_mpls_table_with_candidate.ref"
+    )
+
+    delete_candidate_path("rt6", "1.1.1.1", 100)
+
+
 #
 # Step 2
 #
